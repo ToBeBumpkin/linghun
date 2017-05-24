@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    {include file="common/css" /}
+    <link href="{$Think.config.web_res_root}/index/css/login.css" rel="stylesheet" />
+
+</head>
+<body>
+<div class="loginbg">
+    <div class="container mt45">
+        <div class="row">
+            <div class="col-sm-4 wh">
+                待来年春暖花开，若你我缘分不断，因果不分。你未觅得良人，容我许你一世长安可好？
+            </div>
+            <div class="col-sm-5 col-sm-offset-3">
+                <form action="#" method="post" class="loginform">
+                    <h2 class="f24 mb30 g9">Login</h2>
+                    <div class="input-group input-group-lg mb30">
+                        <span class="input-group-addon">
+                            <i class="fa fa-user"></i>
+                        </span>
+                        <input type="text" class="form-control" placeholder="loginname">
+                    </div>
+                    <div class="input-group input-group-lg mb30">
+                        <span class="input-group-addon">
+                            <i class="fa fa-unlock-alt"></i>
+                        </span>
+                        <input type="text" class="form-control" placeholder="password">
+                    </div>
+                    <p class="text-danger">&nbsp;</p>
+                    <button type="button" class="btn btn-default btn-lg btn-block mb20">Login</button>
+                    <div class="mb30">
+                        <a class="" href="javascript:;">忘记密码</a>
+                        <a class="pull-right" href="javascript:;">注册</a>
+                    </div>
+                    <hr/>
+                    <div class="text-center f24 mt20">
+                        <a href="javascript:;"><i class="fa fa-tencent-weibo"></i></a>
+                        <a href="javascript:;"><i class="fa fa-qq"></i></a>
+                        <a href="javascript:;"><i class="fa fa-wechat"></i></a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="loginwrap">
+
+</div>
+
+{include file="common/js" /}
+
+<script type="text/javascript">
+    $(function () {
+        var snow="<span class='snow'>❅</span>";
+        setInterval(function () {
+            var owidth=$(document).width();
+            var e=Math.random()*owidth-100;
+            var o=0.3+Math.random();
+            var font=10+Math.random()*30;
+            var l=e-100+200*Math.random();
+            var k=5000+5000*Math.random();
+
+            $(snow).clone().appendTo(".loginbg").css({
+                left:e+"px",
+                opacity:o,
+                "font-size":font,
+            }).animate({
+                top:"800px",
+                left:l+"px",
+                opacity:0.1,
+            },k,"linear",function () {
+                $(this).remove();
+            })
+        },200);
+    })
+</script>
+</body>
+</html>

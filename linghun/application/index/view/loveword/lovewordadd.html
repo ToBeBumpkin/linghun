@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>留下你的一句话</title>
+    {include file="common/css" /}
+    <link href="{$Think.config.web_res_root}/index/css/loveword.css" rel="stylesheet" />
+
+</head>
+<body>
+{include file="common/head" /}
+<div class="container">
+    <div class="lovewordadd">
+        <div class="loveword_addform">
+
+            <div class="form-group">
+                <textarea placeholder="你心底想说的话" rows="3" name="lcontent" class="form-control input-lg"></textarea>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <input type="text" placeholder="留个自己的标识吧（比如昵称或出处）" name="lusername" class="form-control input-lg"/>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <input type="email" placeholder="留下邮箱吧，万一呢（邮箱不公开）" name="lemail" class="form-control input-lg"/>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group form-group-lg text-right">
+                <button type="submit" id="subbtn" class="btn btn-default btn-lg">保存</button>
+            </div>
+            <p class="text-muted text-right fs14">注：你的邮箱不会被公开</p>
+        </div>
+    </div>
+
+</div>
+
+
+
+{include file="common/footer" /}
+{include file="common/js" /}
+
+<script type="text/javascript">
+    $(function () {
+
+        $("#subbtn").click(function () {
+            lovewordadd();
+        });
+        
+        /*添加*/
+        function lovewordadd() {
+            $.ajax({
+                type: 'POST',
+                url: 'lovewordadd',
+                data: {
+                    lcontent:$("textarea[name=lcontent]").val(),
+                    lusername:$("input[name=lusername]").val(),
+                    lemail:$("input[name=lemail]").val(),
+                },
+                beforeSend:function(){
+                    jz = layer.load(1, {shade: false}); //0代表加载的风格，支持0-2
+                },
+                success: function (data) {
+                    //关闭加载层
+                    layer.close(jz);
+                    setTimeout(function () {
+                        location.href="{:url('index/loveword/lovewordlist')}";
+                    },1000)
+
+                },
+                error:function () {
+                    layer.close(jz);
+                    swal("网络错误!请稍后重试", "", "error");
+                }
+            });
+        }
+
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{$postcard.title}</title>
+    {include file="common/css" /}
+    <link href="{$Think.config.web_res_root}/index/css/postcard.css" rel="stylesheet" />
+</head>
+<body>
+{include file="common/head" /}
+<div class="container postcardDetail">
+    <h3 class="title">{$postcard.title}</h3>
+    <p class="time">{$postcard.create_time}</p>
+    <p class="descript">{$postcard.descript}</p>
+
+    <blockquote class="layui-elem-quote">
+        <h3>正面</h3>
+    </blockquote>
+    <br/>
+
+    <img class="img-responsive center-block" src='http://ohz6170je.bkt.clouddn.com/{$postcard.fountpath}'/>
+    <br/>
+
+    <blockquote class="layui-elem-quote">
+        <h3>反面</h3>
+    </blockquote>
+    <br/>
+
+    <img class="img-responsive center-block" src='http://ohz6170je.bkt.clouddn.com/{$postcard.backpath}'/>
+    <br/>
+
+    <!--<p><a class="btn btn-primary" href='http://ohz6170je.bkt.clouddn.com/{$postcard.descript}'>下载源文件</a></p>-->
+
+
+    <br/><br/><br/><br/>
+
+
+    <h2 class="commentTit">留下你的足迹</h2>
+    <div class="commentWrap">
+        <div class="commentform">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <input type="text" placeholder="怎么称呼" name="username" class="form-control input-lg"/>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <input type="email" placeholder="邮箱" name="email" class="form-control input-lg"/>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <textarea placeholder="你的留言" rows="3" name="content" class="form-control input-lg"></textarea>
+            </div>
+            <div class="form-group form-group-lg text-right">
+                <input type="hidden" name="id" value="{$postcard.id}">
+                <button type="submit" id="subbtn" class="btn btn-default btn-lg">保存</button>
+            </div>
+            <p class="text-muted text-right fs14">注：你的邮箱不会被公开</p>
+        </div>
+        <br>
+        <ul class="commentlis">
+            <!--<li>
+                <h3 class="commentName">猴子派来的救兵</h3>
+                <p class="text-muted commentTime">2017-02-02</p>
+                <p class="commentCon text-muted">You see, madness, as you know, is like gravity. All it takes is a little push!
+                    疯狂就像地心引力，需要做的只是轻轻一推。</p>
+                <div class="text-right">
+                    <i class="fa-commenting-o fa" title="回复"></i>
+                </div>
+                <div class="soncommentform"></div>
+                <hr/>
+                <br>
+                <div class="soncommentlis">
+                    <h3 class="commentName">猴子派来的救兵<span class="text-muted">&nbsp;回复&nbsp;</span>八戒</h3>
+                    <p class="text-muted commentTime">2017-02-02</p>
+                    <p class="commentCon text-muted">You see, madness, as you know, is like gravity. All it takes is a little push!
+                        疯狂就像地心引力，需要做的只是轻轻一推。</p>
+                    <div class="text-right">
+                        <i class="fa-commenting-o fa" title="回复"></i>
+                    </div>
+                    <div class="soncommentform"></div>
+                    <hr/>
+                </div>
+                <br>
+            </li>-->
+        </ul>
+    </div>
+
+</div>
+
+{include file="common/footer" /}
+{include file="common/js" /}
+
+<script type="text/javascript">
+    var parentCommentid=0;
+    var nowtype=2;
+
+    $(function () {
+        getcomment();
+    })
+
+    $("#subbtn").click(function () {
+        if (getdata()){
+            subcomment(getdata());
+        }
+    })
+
+    function getdata() {
+        var username=$("input[name=username]").val();
+        var email=$("input[name=email]").val();
+        var content=$("textarea[name=content]").val();
+
+        if (username == ""){
+            layer.msg('请填写你的称呼');
+            return false;
+        }else if ($.trim(username) == "soul"){
+            layer.msg('不要意思，本称呼为本站专属称呼');
+            return false;
+        }else if ($.trim(content) == ""){
+            layer.msg('还是留点足记吧');
+            $("textarea[name=content]").focus();
+            return false;
+        }
+
+
+
+        var data={
+            pid:$("input[name=id]").val(),
+            username:username,
+            email:email,
+            content:content,
+            type:nowtype,
+            pcid:parentCommentid
+        };
+        return data;
+    }
+
+    function getcomment() {
+        var data={
+            pid:$("input[name=id]").val(),
+            type:nowtype
+        };
+        $.ajax({
+            type:"POST",
+            url:"{:url('index/comment/commentList')}",
+            data:data,// 你的formid
+            async: false,
+            beforeSend:function(){
+                jz = layer.load(0, {shade: false}); //0代表加载的风格，支持0-2
+            },
+            error: function(request) {
+                layer.close(jz);
+                swal("网络错误!", "", "error");
+            },
+            success: function(data) {
+                layer.close(jz);
+
+                var html="";
+                for (var i=0;i<data.length;i++){
+                    html+='<li>';
+                    html+='<h3 class="commentName">'+data[i].name+'<span class="text-muted">&nbsp;说了&nbsp;</span></h3>';
+                    html+='<p class="text-muted commentTime">'+data[i].create_time+'</p>';
+                    html+='<p class="commentCon text-muted">'+data[i].content+'</p>';
+                    html+='<div class="text-right"><i class="fa-commenting-o fa replyinfo" title="回复" sid="'+data[i].id+'" pcid="'+data[i].id+'"></i></div>';
+                    html+='<div class="soncommentform"></div><hr/><br>';
+                    var soncomment=data[i].soncomment;
+                    if (soncomment){
+                        for (var j=0;j<soncomment.length;j++){
+                            html+='<div class="soncommentlis">';
+                            html+='<h3 class="commentName">'+soncomment[j].name+'<span class="text-muted">&nbsp;回复了&nbsp;</span>';
+                            if (soncomment[j].replyinfo){
+                                html+=soncomment[j].replyinfo.name;
+                            }
+                            html+='</h3>';
+                            html+='<p class="text-muted commentTime">'+soncomment[j].create_time+'</p>';
+                            html+='<p class="commentCon text-muted">'+soncomment[j].content+'</p>';
+                            html+='<div class="text-right"><i class="fa-commenting-o fa replyinfo" title="回复" sid="'+soncomment[j].id+'" pcid="'+data[i].id+'"></i></div>';
+                            html+='<div class="soncommentform"></div><hr/></div><br>';
+                        }
+                    }
+                    html+='</li>';
+                }
+
+                $(".commentlis").html(html);
+                loadreply();
+
+                //关闭加载层
+                /*layer.close(jz);
+                 if(data.code == 1){
+                 swal(data.msg, "", "success");
+
+                 }else{
+                 swal(data.msg, "", "error");
+                 }*/
+
+            }
+        });
+    }
+
+    function loadreply() {
+        var onoff=true;
+        $(".replyinfo").bind("click",function () {
+            var obj=$(this);
+
+            var pcid=obj.attr("pcid");
+            var sid=obj.attr("sid");
+
+            var formhtml="";
+            formhtml+='<br/><div class="row"><div class="col-sm-6"><div class="form-group">';
+            formhtml+='<input type="text" placeholder="怎么称呼" name="susername" class="form-control input-lg"/>';
+            formhtml+='</div></div><div class="col-sm-6"><div class="form-group">';
+            formhtml+='<input type="email" placeholder="邮箱" name="semail" class="form-control input-lg"/>';
+            formhtml+='</div></div></div><div class="form-group">';
+            formhtml+='<textarea placeholder="你的留言" rows="3" name="scontent" class="form-control input-lg"></textarea>';
+            formhtml+='</div><div class="form-group form-group-lg text-right">';
+            formhtml+='<button type="submit" class="btn btn-default btn-lg ssubbtn">保存</button>';
+            formhtml+='<input type="hidden" name="pcid" value="'+pcid+'">';
+            formhtml+='<input type="hidden" name="sid" value="'+sid+'">';
+            formhtml+='</div>';
+
+            if (onoff){
+                onoff=false;
+                obj.parent("div").next().html(formhtml)
+            }else {
+                onoff=true;
+                obj.parent("div").next().empty();
+            }
+            loadsub();
+        });
+
+    }
+
+    function loadsub() {
+        $(".ssubbtn").bind("click",function () {
+            var obj=$(this);
+            var fatherobj=obj.parents(".soncommentform");
+
+            var username=fatherobj.find("input[name=susername]").val();
+            var email=fatherobj.find("input[name=semail]").val();
+            var content=fatherobj.find("textarea[name=scontent]").val();
+
+            if (username == ""){
+                layer.msg('请填写你的称呼');
+                return false;
+            }else if ($.trim(username) == "soul"){
+                layer.msg('不要意思，本称呼为本站专属称呼');
+                return false;
+            }else if ($.trim(content) == ""){
+                layer.msg('还是留点足记吧');
+                $("textarea[name=content]").focus();
+                return false;
+            }
+
+            var data={
+                pid:$("input[name=id]").val(),
+                username:username,
+                email:email,
+                content:content,
+                replyid:fatherobj.find("input[name=sid]").val(),
+                type:nowtype,
+                pcid:fatherobj.find("input[name=pcid]").val()
+            };
+
+            subcomment(data);
+        })
+    }
+
+    function subcomment(data) {
+        $.ajax({
+            type:"POST",
+            url:"{:url('index/comment/commentAdd')}",
+            data:data,// 你的formid
+            async: false,
+            beforeSend:function(){
+                jz = layer.load(0, {shade: false}); //0代表加载的风格，支持0-2
+            },
+            error: function(request) {
+                layer.close(jz);
+                swal("网络错误!", "", "error");
+            },
+            success: function(data) {
+                //关闭加载层
+                layer.close(jz);
+                getcomment();
+                resetform();
+                /*if(data.code == 1){
+                 swal(data.msg, "", "success");
+
+                 }else{
+                 swal(data.msg, "", "error");
+                 }*/
+
+            }
+        });
+    }
+
+    function resetform() {
+        $("input[name=username]").val("");
+        $("input[name=email]").val("");
+        $("textarea[name=content]").val("");
+    }
+
+
+</script>
+    </body>
+</html>

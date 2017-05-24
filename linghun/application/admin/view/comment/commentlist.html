@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {include file="common/header" /}
+    {include file="common/css" /}
+</head>
+<body>
+{include file="common/navbar" /}
+{include file="common/head" /}
+<div class="wrap">
+
+    <div class="container-fluid animated fadeInRight">
+        <label>
+            <a class="btn btn-primary" href="../comment/commentadd">添加留言</a>
+        </label>
+
+        <table id="cusTable" data-height="700">
+            <thead>
+            <th data-field="id">id</th>
+            <th data-field="name">称呼</th>
+            <th data-field="content">内容</th>
+            <th data-field="email">邮箱</th>
+            <th data-field="ip">IP</th>
+            <th data-field="address">地址</th>
+            <th data-field="create_time">时间</th>
+            <th data-field="type">类型</th>
+            <th data-field="pcid">父评论id</th>
+            <th data-field="replyid">回复对象id</th>
+            <th data-field="operate">操作</th>
+            </thead>
+        </table>
+    </div>
+</div>
+
+{include file="common/js" /}
+
+<script type="text/javascript">
+    function initTable() {
+        //先销毁表格
+        $('#cusTable').bootstrapTable('destroy');
+        //初始化表格,动态从服务器加载数据
+        $("#cusTable").bootstrapTable({
+            method: "get",  //使用get请求到服务器获取数据
+            url: "commentList", //获取数据的地址
+            striped: true,  //表格显示条纹
+            pagination: true, //启动分页
+            pageSize: 10,  //每页显示的记录数
+            pageNumber:1, //当前第几页
+            pageList: [5, 10, 15, 20, 25],  //记录数可选列表
+            sidePagination: "server", //表示服务端请求
+            //设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder
+            //设置为limit可以获取limit, offset, search, sort, order
+            queryParamsType : "undefined",
+            queryParams: function queryParams(params) {   //设置查询参数
+                var param = {
+                    pageNumber: params.pageNumber,
+                    pageSize: params.pageSize,
+                    searchText:''
+                };
+                return param;
+            },
+            onLoadSuccess: function(data){  //加载成功时执行
+                layer.msg("加载成功", {time : 1000});
+            },
+            onLoadError: function(){  //加载失败时执行
+                layer.msg("加载数据失败");
+            }
+        });
+    }
+
+    function commentDel(id){
+        layer.confirm('确定删除此留言吗',{icon:3,title:'提示'},function (index) {
+            $.getJSON('commentDel',{'id':id},function (res) {
+                if (res.code == 1){
+                    layer.alert('删除成功');
+                    initTable();
+                }else {
+                    layer.alert('删除失败');
+                }
+            });
+            layer.close(index);
+        })
+
+    }
+
+    $(document).ready(function () {
+        //调用函数，初始化表格
+        initTable();
+
+        //当点击查询按钮的时候执行
+        $("#search").bind("click", initTable);
+    });
+</script>
+</body>
+</html>

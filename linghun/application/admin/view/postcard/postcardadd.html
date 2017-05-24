@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {include file="common/header" /}
+    {include file="common/css" /}
+    <link href="{$Think.config.web_res_root}/admin/plugins/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet" />
+    <link href="{$Think.config.web_res_root}/admin/plugins/webuploader/dist/webuploader.css" rel="stylesheet" />
+</head>
+<body>
+{include file="common/navbar" /}
+{include file="common/head" /}
+<div class="wrap">
+
+    <div class="container-fluid animated fadeInRight">
+        <form class="layui-form" id="postcardadd" action="">
+            <div class="layui-form-item">
+                <label class="layui-form-label">标题</label>
+                <div class="layui-input-block">
+                    <input name="title" required="" autocomplete="off" placeholder="请输入标题" class="layui-input" type="text">
+                </div>
+            </div>
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">描述</label>
+                <div class="layui-input-block">
+                    <textarea class="layui-textarea layui-hide" name="descript" lay-verify="content" id="LAY_demo_editor"></textarea>
+                </div>
+            </div>
+            <div id="descript" style="height: 0;overflow: hidden;"></div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">原文件</label>
+                <div class="layui-input-block">
+                    <div id="uploadimg">
+                        <div id="fileList" class="uploader-list"></div>
+                        <div id="imgPicker">选择文件</div>
+                    </div>
+                    <input type="hidden" name="relfilepath" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">正面</label>
+                <div class="layui-input-block">
+                    <input id="fountpath" name="uploadimginput" type="file" class="file-loading" accept="image/*" />
+                    <input type="hidden" class="relfountpath" name="relfountpath"/>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">反面</label>
+                <div class="layui-input-block">
+                    <input id="backpath" name="uploadimginput" type="file" class="file-loading" accept="image/*" />
+                    <input type="hidden" class="relbackpath" name="relbackpath"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" type="button" onclick="toVaild()">立即提交</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{include file="common/js" /}
+<script src="{$Think.config.web_res_root}/admin/plugins/validate/jquery.validate.min.js"></script>
+<script src="{$Think.config.web_res_root}/admin/plugins/validate/messages_zh.min.js"></script>
+<script src="{$Think.config.web_res_root}/admin/plugins/bootstrap-fileinput/js/fileinput.js"></script>
+<script src="{$Think.config.web_res_root}/admin/plugins/bootstrap-fileinput/js/fileinput_locale_zh.js"></script>
+<script src="{$Think.config.web_res_root}/admin/plugins/webuploader/dist/webuploader.js" type="text/javascript"></script>
+<script src="{$Think.config.web_res_root}/admin/plugins/webuploader/dist/webuploader.html5only.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+
+
+    var uploader = WebUploader.create({
+        auto: true, // 选完文件后，是否自动上传
+        swf: '{$Think.config.web_res_root}/admin/plugins/webuploader/dist/Uploader.swf', // swf文件路径
+        server: "{:url('admin/uploadfile/uploadFileAdd')}", // 文件接收服务端
+        pick: '#imgPicker', // 选择文件的按钮。可选
+
+    });
+    uploader.on( 'fileQueued', function( file ) {
+        var $list = $("#fileList"),
+                $li = $(
+                        '<div id="' + file.id + '" class="file-item thumbnail">' +
+                        '<img>' +
+                        '<div class="info">' + file.name + '</div>' +
+                        '</div>'
+                ),
+                $img = $li.find('img');
+
+
+        // $list为容器jQuery实例
+        $list.append( $li );
+
+        // 创建缩略图
+        uploader.makeThumb( file, function( error, src ) {
+            if ( error ) {
+                $img.replaceWith('<span>不能预览</span>');
+                return;
+            }
+
+            $img.attr( 'src', src );
+        }, 100, 100 ); //100x100为缩略图尺寸
+    });
+
+    // 文件上传过程中创建进度条实时显示。
+    uploader.on( 'uploadProgress', function( file, percentage ) {
+        var $li = $( '#'+file.id ),
+                $percent = $li.find('.progress span');
+
+        // 避免重复创建
+        if ( !$percent.length ) {
+            $percent = $('<p class="progress"><span></span></p>')
+                    .appendTo( $li )
+                    .find('span');
+        }
+
+        $percent.css( 'width', percentage * 100 + '%' );
+    });
+
+    // 文件上传成功，给item添加成功class, 用样式标记上传成功。
+    uploader.on( 'uploadSuccess', function( file, res ) {
+        console.log(res.filePath);//这里可以得到上传后的文件路径
+        $("input[name=relfilepath]").val(res.filePath);
+        $( '#'+file.id ).addClass('upload-state-done');
+    });
+
+    // 文件上传失败，显示上传出错。
+    uploader.on( 'uploadError', function( file ) {
+        var $li = $( '#'+file.id ),
+                $error = $li.find('div.error');
+
+        // 避免重复创建
+        if ( !$error.length ) {
+            $error = $('<div class="error"></div>').appendTo( $li );
+        }
+
+        $error.text('上传失败');
+    });
+
+    // 完成上传完了，成功或者失败，先删除进度条。
+    uploader.on( 'uploadComplete', function( file ) {
+        $( '#'+file.id ).find('.progress').remove();
+    });
+
+
+</script>
+
+<script type="text/javascript">
+    $("#fountpath")
+            .fileinput({
+                language: 'zh',
+                uploadUrl: "{:url('admin/uploadimg/uploadadd')}",
+                autoReplace: true,
+                maxFileCount: 1,
+                allowedFileExtensions: ["jpg", "png", "gif"],
+                browseClass: "btn btn-primary", //按钮样式
+                previewFileIcon: "<i class='glyphicon glyphicon-king'></i>"
+            })
+            .on("fileuploaded", function (e, data) {
+                var res = data.response;
+                if (res.code == 1){
+                    $(".relfountpath").val(res.data);
+                }
+
+            });
+
+    $("#backpath")
+            .fileinput({
+                language: 'zh',
+                uploadUrl: "{:url('admin/uploadimg/uploadadd')}",
+                autoReplace: true,
+                maxFileCount: 1,
+                allowedFileExtensions: ["jpg", "png", "gif"],
+                browseClass: "btn btn-primary", //按钮样式
+                previewFileIcon: "<i class='glyphicon glyphicon-king'></i>"
+            })
+            .on("fileuploaded", function (e, data) {
+                var res = data.response;
+                if (res.code == 1){
+                    $(".relbackpath").val(res.data);
+                }
+
+            });
+</script>
+
+<script>
+
+    layui.use(['form', 'layedit', 'laydate','element','upload'], function(){
+        var form = layui.form()
+                ,layer = layui.layer
+                ,layedit = layui.layedit
+                ,laydate = layui.laydate;
+
+        //自定义验证规则
+        /*form.verify({
+         title: function(value){
+         if(value.length < 5){
+         return '标题至少得5个字符啊';
+         }
+         }
+         ,pass: [/(.+){6,12}$/, '密码必须6到12位']
+         });*/
+
+        /*layedit.set({
+            uploadImage: {
+                url: "{:url('admin/test/uploadimg')}" //接口url
+                ,type: 'post' //默认post
+            }
+        })*/
+        //创建一个编辑器
+        var index=layedit.build('LAY_demo_editor',['uploadImage']);
+        $("#descript").click(function () {
+            $("#descript").html(layedit.getContent(index));
+        })
+
+        layui.upload({
+            url: "{:url('admin/test/uploadbootimg')}" //上传接口
+            ,before: function(input){
+                //返回的参数item，即为当前的input DOM对象
+                //console.log('文件上传中');
+            }
+            ,success: function(res){ //上传成功后的回调
+                //console.log('文件上传');
+                //alert(res.msg);
+                LAY_demo_upload.src = res.key;
+            }
+        });
+
+        /*layui.upload({
+            url: '/test/upload.json'
+            ,elem: '#test' //指定原始元素，默认直接查找class="layui-upload-file"
+            ,method: 'get' //上传接口的http类型
+            ,success: function(res){
+                LAY_demo_upload.src = res.url;
+            }
+        });*/
+
+        //监听提交
+        /*form.on('submit(demo1)', function(data){
+         layer.alert(JSON.stringify(data.field), {
+         title: '最终的提交信息'
+         })
+         return false;
+         });*/
+    });
+
+    //表单提交
+    function toVaild(){
+        $("#descript").click();
+        var jz;
+        var data={
+            title:$("input[name=title]").val(),
+            descript:$("#descript").html(),
+            filepath:$("input[name=relfilepath]").val(),
+            fountpath:$(".relfountpath").val(),
+            backpath:$(".relbackpath").val()
+        };
+        /*var imgtitle=$("input[name=imgtitle]").val();
+        var imgcontent=$("input[name=imgcontent]").val();
+        var imgpath=$("#LAY_demo_upload").attr('src');*/
+        $.ajax({
+            type:"POST",
+            url:'postcardAdd',
+            data:data,// 你的formid
+            async: false,
+            beforeSend:function(){
+                jz = layer.load(0, {shade: false}); //0代表加载的风格，支持0-2
+            },
+            error: function(request) {
+                layer.close(jz);
+                swal("网络错误!", "", "error");
+            },
+            success: function(data) {
+                //关闭加载层
+                layer.close(jz);
+                if(data.code == 1){
+                    swal(data.msg, "", "success");
+                    setTimeout(function () {
+                        location.href="{:url('admin/postcard/postcardList')}";
+                    },1000)
+                }else{
+                    swal(data.msg, "", "error");
+                }
+
+            }
+        });
+
+        return false;
+    }
+
+
+
+    $.validator.setDefaults({
+        highlight: function(e) {
+            $(e).closest(".form-group").removeClass("has-success").addClass("has-error")
+        },
+        success: function(e) {
+            e.closest(".form-group").removeClass("has-error").addClass("has-success")
+        },
+        errorElement: "span",
+        errorPlacement: function(e, r) {
+            e.appendTo(r.is(":radio") || r.is(":checkbox") ? r.parent().parent().parent() : r.parent())
+        },
+        errorClass: "help-block m-b-none",
+        validClass: "help-block m-b-none"
+    });
+</script>
+</body>
+</html>

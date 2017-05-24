@@ -1,0 +1,26 @@
+<footer>
+
+    <h1 class="countnum">
+
+    </h1>
+</footer>
+
+
+
+<script type="text/javascript">
+    $(function () {
+        $.ajax({
+            type: 'post',
+            url: "{:url('index/index/ipcount')}",
+            success: function (data) {
+                var html="已有"+data.count+"人次访问";
+                $(".countnum").html(html);
+                /*alert(data);*/
+            },
+            error:function () {
+
+            }
+        });
+    })
+
+</script>

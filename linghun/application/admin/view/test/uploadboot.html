@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {include file="common/header" /}
+    {include file="common/css" /}
+    <link href="{$Think.config.web_res_root}/admin/plugins/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet" />
+</head>
+<body>
+<input id="imgUpload" name="testimg" type="file" class="file-loading" accept="image/*">
+<input type="file" name="test2img"/>
+<button class="delimg">删除图片测试</button>
+<button class="getimg">获取</button>
+<div class="imglist"></div>
+{include file="common/js" /}
+<script src="{$Think.config.web_res_root}/admin/plugins/bootstrap-fileinput/js/fileinput.js"></script>
+<script src="{$Think.config.web_res_root}/admin/plugins/bootstrap-fileinput/js/fileinput_locale_zh.js"></script>
+
+<script type="text/javascript">
+    $("#imgUpload")
+            .fileinput({
+                language: 'zh',
+                uploadUrl: "uploadbootimg",
+                autoReplace: true,
+                maxFileCount: 1,
+                allowedFileExtensions: ["jpg", "png", "gif"],
+                browseClass: "btn btn-primary", //按钮样式
+                previewFileIcon: "<i class='glyphicon glyphicon-king'></i>"
+            })
+            .on("fileuploaded", function (e, data) {
+                var res = data.response;
+                console.log(res.res);
+                alert(res.size);
+                alert(res.savename);
+                alert(res.filename);
+
+            });
+
+    $(".getimg").click(function () {
+        $.ajax({
+            type:"get",
+            url:'picList',
+
+            error: function(request) {
+
+            },
+            success: function(data) {
+                alert(data[0][0].key);
+                var html="";
+                for (var i=0;i<data[0].length;i++){
+                    html+="<img src='http://ohz6170je.bkt.clouddn.com/"+data[0][i].key+"' />";
+                    /*html+="<img src='http://ohz6170je.bkt.clouddn.com/2bfc1201612141658546269.jpg' />";*/
+                }
+
+                $(".imglist").html(html);
+            }
+        });
+    });
+
+    $(".delimg").click(function () {
+        $.ajax({
+            type:"get",
+            url:'picDel',
+
+            error: function(request) {
+                alert(request);
+            },
+            success: function(data) {
+                alert(data);
+            }
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {include file="common/header" /}
+    {include file="common/css" /}
+</head>
+<body>
+<input accept="image/*" type="file" name="uploadimg" class="uploadimg"/>
+<img src="" class="imgimg"/>
+<button class="imguploadbtn">上传</button>
+{include file="common/js" /}
+
+<script type="text/javascript">
+    $(function () {
+        /*$(".uploadimg").on("change",function () {
+            var imgsrc=getObjectURL(this.files[0]);
+            console.log(getObjectURL(this.files[0]));
+            $(".imgimg").attr('src',imgsrc);
+        });*/
+
+        $(".uploadimg").change(function (event) {
+            var files=event.target.files,
+                    file;
+
+            if (files && files.length > 0){
+                //获取到上传的文件
+                file=files[0];
+
+                console.log(file);
+
+                //大小限制
+                if (file.size > 1024*1024*20){
+                    alert("图片大小不能超过20m");
+                    return false;
+                }
+
+                // 下面是关键的关键，通过这个 file 对象生成一个可用的图像 URL
+                // 获取 window 的 URL 工具
+                var URL=window.URL || window.webkitURL;
+                // 通过 file 生成目标 url
+                var imgURL=URL.createObjectURL(file);
+                $(".imgimg").attr('src',imgURL);
+            }
+        });
+
+        $(".imguploadbtn").click(function () {
+            var formData = new FormData();
+            formData.append('file', $('.uploadimg')[0]);
+            $.ajax({
+                type:"POST",
+                url:'uploadimg',
+                data:formData,// 你的formid
+                processData: false,
+                async: false,
+                contentType: 'multipart/form-data',
+                mimeType: 'multipart/form-data',
+                beforeSend:function(){
+                    jz = layer.load(0, {shade: false}); //0代表加载的风格，支持0-2
+                },
+                error: function(request) {
+
+                },
+                success: function(data) {
+
+
+                }
+            });
+        })
+    })
+</script>
+</body>
+</html>

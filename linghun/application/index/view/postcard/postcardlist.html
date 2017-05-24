@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <title>明信片</title>
+    {include file="common/css" /}
+    <link href="{$Think.config.web_res_root}/index/css/postcard.css" rel="stylesheet" />
+
+
+</head>
+<body>
+{include file="common/head" /}
+
+<div class="container-fluid postcardwrap" id="postcardwrap">
+    <div class="col-md-4 col-sm-6 postcardlis">
+        <div class="postcardlis_d">
+            <img src="http://ohz6170je.bkt.clouddn.com/92d5e201703081715269994.jpg" class="center-block img-responsive">
+            <p>什么都别说什么都别说了什么都别说了什么都别说了什么都别说了什么都别说了什么都别说了什么都别说了什么都别说了什么都别说了什么都别说了什么都别说了了</p>
+        </div>
+    </div>
+
+</div>
+<div class="container-fluid">
+    <ul class="pager">
+        <li class="previous"><a href="javascript:;">上一页</a></li>
+        <li class="next"><a href="javascript:;">下一页</a></li>
+    </ul>
+</div>
+
+{include file="common/footer" /}
+{include file="common/js" /}
+<script src="{$Think.config.web_res_root}/index/js/common.js"></script>
+
+<script type="text/javascript">
+    $(function () {
+
+        var datas={
+            total:0,
+            totalPage:0,
+            pageSize:8,
+            pageNumber:1,
+            searchText:''
+        };
+
+        getPostcardList(datas);
+
+        $(".previous").click(function () {
+            datas.pageNumber--;
+            getPostcardList(datas);
+        });
+        $(".next").click(function () {
+            datas.pageNumber++;
+            getPostcardList(datas);
+        });
+
+        function getPostcardList(datas) {
+            $.ajax({
+                type: 'POST',
+                url: 'postcardList',
+                data: datas,
+                success: function (data) {
+                    datas.total=data.total;
+                    datas.totalPage=data.totalPage;
+
+                    judgeNum();
+                    var result=data.result;
+                    var html="";
+                    for (var i=0;i<result.length;i++){
+
+                        html+="<div class='col-md-4 col-sm-6 postcardlis'>";
+                        html+="<div class='postcardlis_d'>"
+                        html+="<a href='{:url('postcardDetail')}?id="+result[i].id+"' target='_blank'><img src='http://ohz6170je.bkt.clouddn.com/"+result[i].fountpath+"' class='center-block img-responsive'></a>";
+                        html+="<p>"+result[i].title+"</p>";
+                        html+="</div></div>";
+                    }
+
+                    $(html).find('img').each(function(index){
+                        loadImage($(this).attr('src'));
+                    })
+
+                    $("#postcardwrap").html(html);
+                },
+                error:function () {
+                    swal("网络错误!请稍后重试", "", "error");
+                }
+            });
+        }
+
+        function loadImage(url) {
+            var img = new Image();
+            //创建一个Image对象，实现图片的预下载
+            img.src = url;
+            if (img.complete) {
+                return img.src;
+            }
+            img.onload = function () {
+                return img.src;
+            };
+        };
+
+        function judgeNum() {
+            if (datas.pageNumber >= datas.totalPage){
+                $(".next").hide();
+            }else {
+                $(".next").show();
+            }
+
+            if (datas.pageNumber <= 1){
+                $(".previous").hide();
+            }else {
+                $(".previous").show();
+            }
+        }
+
+    })
+</script>
+</body>
+</html>

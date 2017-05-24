@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {include file="common/header" /}
+    {include file="common/css" /}
+</head>
+<body>
+{include file="common/navbar" /}
+{include file="common/head" /}
+<div class="wrap">
+
+    <div class="container-fluid animated fadeInRight">
+        <div class="bs-callout bs-callout-info">
+            <h4>{$postcard.title}</h4>
+            <p>{$postcard.create_time}</p>
+        </div>
+        <dl>
+            <dt>正面</dt>
+            <dd>
+                <img src="http://ohz6170je.bkt.clouddn.com/{$postcard.fountpath}">
+            </dd>
+        </dl>
+        <dl>
+            <dt>反面</dt>
+            <dd>
+                <img src="http://ohz6170je.bkt.clouddn.com/{$postcard.backpath}">
+            </dd>
+        </dl>
+        <dl>
+            <dt>原文件</dt>
+            <dd>
+                <a href="http://ohz6170je.bkt.clouddn.com/{$postcard.filepath}">下载</a>
+            </dd>
+        </dl>
+        <div>
+            {$postcard.descript}
+        </div>
+
+    </div>
+</div>
+
+{include file="common/js" /}
+<script src="{$Think.config.web_res_root}/admin/plugins/validate/jquery.validate.min.js"></script>
+<script src="{$Think.config.web_res_root}/admin/plugins/validate/messages_zh.min.js"></script>
+
+
+
+<script>
+
+</script>
+</body>
+</html>

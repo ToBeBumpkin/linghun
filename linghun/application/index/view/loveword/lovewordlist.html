@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>留下你的一句话</title>
+    {include file="common/css" /}
+    <link href="{$Think.config.web_res_root}/index/css/loveword.css" rel="stylesheet" />
+
+</head>
+<body>
+{include file="common/head" /}
+<div class="container">
+    <ul class="list-group meetword">
+        <li class="list-group-item list-group-item-danger meetword_tit">偶遇一句<button class="btn btn-primary pull-right meetbegin">再遇一次</button></li>
+        <li class="list-group-item list-group-item-default lovewordLists" id="random_loveword">
+            <h3>茫茫逝水空旋雁，飞瀑梦碎千重涧。</h3>
+            <p class="text-muted">—— soul</p>
+            <p class="text-muted time">2017.03.05</p>
+            <div class="row loveworddo text-center">
+                <div class="col-xs-4">
+                    <i class="fa-thumbs-o-up fa"></i>&nbsp;(0)
+                </div>
+                <div class="col-xs-4">
+                    <i class="fa-thumbs-o-down fa"></i>&nbsp;(23)
+                </div>
+                <div class="col-xs-4">
+                    <i class="fa-commenting-o fa"></i>&nbsp;(543)
+                </div>
+            </div>
+        </li>
+    </ul>
+
+
+
+    <div class="lovewordadd text-right">
+        <a href="{:url('index/loveword/lovewordadd')}" class="btn btn-primary loveword_addbtn">发表一下你心底的话吧</a>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-5">
+            <input type="text" name="content_keyword" class="form-control" placeholder="内容关键字"/>
+        </div>
+        <div class="col-sm-5">
+            <input type="text" name="auther_keyword" class="form-control" placeholder="出自哪里 关键字"/>
+        </div>
+        <div class="col-sm-2 text-right">
+            <button type="button" class="btn btn-default searchbtn">查找</button>
+        </div>
+    </div>
+    <ul id="lovewordList">
+        <li class="lovewordLists">
+            <h3>茫茫逝水空旋雁，飞瀑梦碎千重涧。</h3>
+            <p class="text-muted">—— soul</p>
+            <p class="text-muted time">2017.03.05</p>
+            <div class="row loveworddo text-center">
+                <div class="col-xs-4">
+                    <i class="fa-thumbs-o-up fa"></i>&nbsp;(0)
+                </div>
+                <div class="col-xs-4">
+                    <i class="fa-thumbs-o-down fa"></i>&nbsp;(23)
+                </div>
+                <div class="col-xs-4">
+                    <i class="fa-commenting-o fa"></i>&nbsp;(543)
+                </div>
+            </div>
+        </li>
+    </ul>
+    <ul class="pager">
+        <li class="previous"><a href="javascript:;">上一页</a></li>
+        <li class="next"><a href="javascript:;">下一页</a></li>
+    </ul>
+</div>
+
+
+
+{include file="common/footer" /}
+{include file="common/js" /}
+
+<script type="text/javascript">
+    $(function () {
+
+        var datas={
+            total:0,
+            totalPage:0,
+            pageSize:8,
+            pageNumber:1,
+            searchText:'',
+            autherText:''
+        };
+
+        randomLoveword();
+
+        getLovewordList(datas);
+        
+        $(".searchbtn").click(function () {
+            datas.searchText=$("input[name=content_keyword]").val();
+            datas.autherText=$("input[name=auther_keyword]").val();
+            getLovewordList(datas);
+        });
+
+        $(".meetbegin").click(function () {
+            randomLoveword();
+        });
+
+        $(".previous").click(function () {
+            datas.pageNumber--;
+            getLovewordList(datas);
+        });
+        $(".next").click(function () {
+            datas.pageNumber++;
+            getLovewordList(datas);
+        });
+        
+        function judgeNum() {
+            if (datas.pageNumber >= datas.totalPage){
+                $(".next").hide();
+            }else {
+                $(".next").show();
+            }
+
+            if (datas.pageNumber <= 1){
+                $(".previous").hide();
+            }else {
+                $(".previous").show();
+            }
+        }
+
+        function getLovewordList(datas) {
+            $.ajax({
+                type: 'POST',
+                url: 'lovewordlist',
+                data: datas,
+                success: function (data) {
+                    datas.total=data.total;
+                    datas.totalPage=data.totalPage;
+
+                    judgeNum();
+                    var data=data.result;
+                    var html="";
+                    for (var i=0;i<data.length;i++){
+                        html+="<li class='lovewordLists'>";
+                        html+="<h3>"+data[i].content+"</h3>";
+                        html+="<p class='text-muted'>—— "+data[i].auther+"</p>";
+                        html+="<p class='text-muted time'>"+data[i].create_time+"</p>";
+                        html+="<div class='row loveworddo text-center'><div class='col-xs-4'><i class='fa-thumbs-o-up fa likeicon' thisid='"+data[i].id+"'></i>&nbsp;(<span class='numbercon'>"+data[i].like+"</span>)</div>";
+                        html+="<div class='col-xs-4'><i class='fa-thumbs-o-down fa dislikeicon' thisid='"+data[i].id+"'></i>&nbsp;(<span class='numbercon'>"+data[i].dislike+"</span>)</div>";
+                        html+="<div class='col-xs-4'><a target='_blank' href='{:url('lovewordDetail')}?id="+data[i].id+"'><i class='fa-commenting-o fa'></i></a></div></div>";
+                        html+="</li>";
+                    }
+                    $("#lovewordList").html(html);
+                    likeadd();
+                    dislikeadd();
+                },
+                error:function () {
+                    swal("网络错误!请稍后重试", "", "error");
+                }
+            });
+        }
+
+        /*随机获取*/
+        function randomLoveword() {
+            $.ajax({
+                type: 'get',
+                url: 'lovewordRandom',
+                data:{
+                    num:1
+                },
+                datatype:'json',
+                success: function (data) {
+
+                    var html="";
+                    for (var i=0;i<data.length;i++){
+                        html+="<h3>"+data[i].content+"</h3>";
+                        html+="<p class='text-muted'>—— "+data[i].auther+"</p>";
+                        html+="<p class='text-muted time'>"+data[i].create_time+"</p>";
+                        html+="<div class='row loveworddo text-center'><div class='col-xs-4'><i class='fa-thumbs-o-up fa likeicon' thisid='"+data[i].id+"'></i>&nbsp;(<span class='numbercon'>"+data[i].like+"</span>)</div>";
+                        html+="<div class='col-xs-4'><i class='fa-thumbs-o-down fa dislikeicon' thisid='"+data[i].id+"'></i>&nbsp;(<span class='numbercon'>"+data[i].dislike+"</span>)</div>";
+                        html+="<div class='col-xs-4'><a target='_blank' href='{:url('lovewordDetail')}?id="+data[i].id+"'><i class='fa-commenting-o fa'></i></a></div></div>";
+                    }
+                    $("#random_loveword").html(html);
+                    likeadd();
+                    dislikeadd();
+                },
+                error:function () {
+                    swal("网络错误!请稍后重试", "", "error");
+                }
+            });
+        }
+
+
+        function likeadd() {
+            $(".likeicon").unbind('click').bind("click",function () {
+                var obj=$(this);
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'lovewordlikeadd',
+                    data: {
+                        id:obj.attr("thisid")
+                    },
+                    beforeSend:function(){
+                        jz = layer.load(0, {shade: false}); //0代表加载的风格，支持0-2
+                    },
+                    success: function (data) {
+                        //关闭加载层
+                        layer.close(jz);
+                        var num=obj.parent().find(".numbercon");
+                        num.html(parseInt(num.html())+1);
+                    },
+                    error:function () {
+                        layer.close(jz);
+                        swal("网络错误!请稍后重试", "", "error");
+                    }
+                });
+            })
+        }
+
+        function dislikeadd() {
+            $(".dislikeicon").bind("click",function () {
+                var obj=$(this);
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'loveworddislikeadd',
+                    data: {
+                        id:obj.attr("thisid")
+                    },
+                    beforeSend:function(){
+                        jz = layer.load(0, {shade: false}); //0代表加载的风格，支持0-2
+                    },
+                    success: function (data) {
+                        //关闭加载层
+                        layer.close(jz);
+                        var num=obj.parent().find(".numbercon");
+                        num.html(parseInt(num.html())+1);
+                    },
+                    error:function () {
+                        layer.close(jz);
+                        swal("网络错误!请稍后重试", "", "error");
+                    }
+                });
+            })
+        }
+    })
+</script>
+</body>
+</html>

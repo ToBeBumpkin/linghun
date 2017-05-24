@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {include file="common/header" /}
+    {include file="common/css" /}
+</head>
+<body>
+{include file="common/navbar" /}
+{include file="common/head" /}
+<div class="wrap">
+
+    <div class="container-fluid animated fadeInRight">
+        <div class="bs-callout bs-callout-info">
+            <h4>{$article.title}</h4>
+            <p>{$article.create_time}</p>
+        </div>
+        <div>
+            {$article.article}
+        </div>
+        <p>
+            {$article.reprint}
+        </p>
+    </div>
+</div>
+
+{include file="common/js" /}
+
+</body>
+</html>

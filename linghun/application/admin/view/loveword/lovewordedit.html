@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {include file="common/header" /}
+    {include file="common/css" /}
+</head>
+<body>
+{include file="common/navbar" /}
+{include file="common/head" /}
+<div class="wrap">
+
+    <div class="container-fluid animated fadeInRight">
+        <form class="layui-form" action="">
+            <div class="layui-form-item">
+                <label class="layui-form-label">内容</label>
+                <div class="layui-input-block">
+                    <textarea placeholder="请输入内容" name="lcontent" class="layui-textarea">{$loveword.content}</textarea>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">作者</label>
+                <div class="layui-input-block">
+                    <input required="" name="lusername" autocomplete="off" placeholder="作者" value="{$loveword.auther}" class="layui-input" type="text">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">email</label>
+                <div class="layui-input-block">
+                    <input required="" autocomplete="off" name="lemail" placeholder="邮箱" value="{$loveword.email}" class="layui-input" type="text">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <input type="hidden" value="{$loveword.id}" name="id" />
+                    <button class="layui-btn" type="button" onclick="toVaild()">立即提交</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{include file="common/js" /}
+<script src="{$Think.config.web_res_root}/admin/plugins/validate/jquery.validate.min.js"></script>
+<script src="{$Think.config.web_res_root}/admin/plugins/validate/messages_zh.min.js"></script>
+<script src="{$Think.config.web_res_root}/admin/plugins/ckeditor/ckeditor.js"></script>
+
+
+<script type="text/javascript">
+
+    layui.use(['form', 'layedit', 'laydate','element','upload'], function(){
+        var form = layui.form()
+                ,layer = layui.layer
+                ,layedit = layui.layedit
+                ,laydate = layui.laydate;
+
+    });
+
+    //表单提交
+    function toVaild(){
+        var jz;
+        var data={
+            id:$("input[name=id]").val(),
+            lcontent:$("textarea[name=lcontent]").val(),
+            lusername:$("input[name=lusername]").val(),
+            lemail:$("input[name=lemail]").val(),
+        };
+
+        $.ajax({
+            type:"POST",
+            url:'lovewordEdi',
+            data:{'data':data},// 你的formid
+            async: false,
+            beforeSend:function(){
+                jz = layer.load(0, {shade: false}); //0代表加载的风格，支持0-2
+            },
+            error: function(request) {
+                layer.close(jz);
+                swal("网络错误!", "", "error");
+            },
+            success: function(data) {
+                //关闭加载层
+                layer.close(jz);
+                if(data.code == 1){
+                    swal(data.msg, "", "success");
+                    setTimeout(function () {
+                        location.href="{:url('admin/loveword/lovewordList')}";
+                    },1000)
+                }else{
+                    swal(data.msg, "", "error");
+                }
+
+            }
+        });
+
+        return false;
+    }
+
+
+
+    $.validator.setDefaults({
+        highlight: function(e) {
+            $(e).closest(".form-group").removeClass("has-success").addClass("has-error")
+        },
+        success: function(e) {
+            e.closest(".form-group").removeClass("has-error").addClass("has-success")
+        },
+        errorElement: "span",
+        errorPlacement: function(e, r) {
+            e.appendTo(r.is(":radio") || r.is(":checkbox") ? r.parent().parent().parent() : r.parent())
+        },
+        errorClass: "help-block m-b-none",
+        validClass: "help-block m-b-none"
+    });
+</script>
+</body>
+</html>

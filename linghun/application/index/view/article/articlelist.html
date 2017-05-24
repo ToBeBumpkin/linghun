@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文章</title>
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    {include file="common/css" /}
+    <link href="{$Think.config.web_res_root}/index/css/article.css" rel="stylesheet" />
+
+</head>
+<body>
+{include file="common/head" /}
+<div class="container">
+    <ul id="articleList">
+        <!--<li>
+            <h3>茫茫逝水空旋雁，飞瀑梦碎千重涧。</h3>
+            <div>杨意不逢，抚凌云而自惜； 钟期既遇，奏流水以何惭？ 欲将心事付瑶琴。 知音少， 弦断有谁听...饮散离亭西去，浮生长恨飘蓬。回头烟柳渐重重。淡云孤雁远，寒日暮天红。 今夜画船何处？潮平淮...</div>
+            <p>2012-02-03</p>
+        </li>-->
+
+    </ul>
+    <ul class="pager">
+        <li class="previous"><a href="javascript:;">上一页</a></li>
+        <li class="next"><a href="javascript:;">下一页</a></li>
+    </ul>
+</div>
+
+
+
+{include file="common/footer" /}
+{include file="common/js" /}
+
+<script type="text/javascript">
+    $(function () {
+
+        var datas={
+            total:0,
+            totalPage:0,
+            pageSize:8,
+            pageNumber:1,
+            searchText:''
+        };
+
+        getArticleList(datas);
+
+        $(".previous").click(function () {
+            datas.pageNumber--;
+            getArticleList(datas);
+        });
+        $(".next").click(function () {
+            datas.pageNumber++;
+            getArticleList(datas);
+        });
+
+        function getArticleList(datas) {
+            $.ajax({
+                type: 'POST',
+                url: 'articlelist',
+                data: datas,
+                success: function (data) {
+                    datas.total=data.total;
+                    datas.totalPage=data.totalPage;
+
+                    judgeNum();
+                    var result=data.result;
+                    var html="";
+                    for (var i=0;i<result.length;i++){
+                        html+="<li>";
+                        html+="<a target='_blank' href='{:url('articleDetail')}?id="+result[i].id+"'><h3>"+result[i].title+"</h3>";
+                        html+="<div>"+result[i].description+"</div></a>";
+                        html+="<p class='times'>"+result[i].create_time+"</p>";
+                        html+="</li>";
+                    }
+                    $("#articleList").html(html);
+                },
+                error:function () {
+                    swal("网络错误!请稍后重试", "", "error");
+                }
+            });
+        }
+
+
+        function judgeNum() {
+            if (datas.pageNumber >= datas.totalPage){
+                $(".next").hide();
+            }else {
+                $(".next").show();
+            }
+
+            if (datas.pageNumber <= 1){
+                $(".previous").hide();
+            }else {
+                $(".previous").show();
+            }
+        }
+
+    })
+</script>
+</body>
+</html>
